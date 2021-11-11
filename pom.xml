@@ -89,7 +89,10 @@
 
     </properties>
     <repositories>
-
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
         <repository>
             <id>saalfeld-lab-maven-repo</id>
             <url>https://saalfeldlab.github.io/maven</url>
@@ -107,32 +110,18 @@
         </dependency>
         <!-- ImgLib2 dependencies -->
         <dependency>
-            <groupId>net.imglib2</groupId>
-            <artifactId>imglib2-cache</artifactId>
+            <groupId>com.github.saalfeldlab</groupId>
+            <artifactId>template-building</artifactId>
+            <version>d26d3a8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.imagej</groupId>
+            <artifactId>imagej-legacy</artifactId>
         </dependency>
         <dependency>
-            <groupId>net.imglib2</groupId>
-            <artifactId>imglib2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.imglib2</groupId>
-            <artifactId>imglib2-algorithm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.imglib2</groupId>
-            <artifactId>imglib2-algorithm-fft</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.imglib2</groupId>
-            <artifactId>imglib2-algorithm-gpl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.imglib2</groupId>
-            <artifactId>imglib2-ij</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.imglib2</groupId>
-            <artifactId>imglib2-realtransform</artifactId>
+            <groupId>sc.fiji</groupId>
+            <artifactId>IO_</artifactId>
         </dependency>
 
         <!--        Serializing      -->

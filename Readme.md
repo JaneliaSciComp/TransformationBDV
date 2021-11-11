@@ -5,3 +5,8 @@ Using :
 - BigDataViewer https://github.com/bigdataviewer/bigdataviewer-core
 - Elastix https://github.com/SuperElastix/elastix
 - Template-Building https://github.com/saalfeldlab/template-building
+
+TODO:
+Fix translation matrix after running
+Continue axes reorder
+finish scaling

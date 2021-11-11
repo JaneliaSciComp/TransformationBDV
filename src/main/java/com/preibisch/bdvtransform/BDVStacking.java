@@ -1,5 +1,6 @@
 package com.preibisch.bdvtransform;
 
+import bdv.tools.transformation.TransformedSource;
 import bdv.ui.BdvDefaultCards;
 import bdv.ui.CardPanel;
 import bdv.util.BdvFunctions;
@@ -7,7 +8,9 @@ import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import bdv.viewer.Source;
 import com.preibisch.bdvtransform.panels.SourceSelectionPanel;
+import com.preibisch.bdvtransform.panels.TranslationPanel;
 import com.preibisch.bdvtransform.panels.utils.SourceSelector;
+import com.preibisch.bdvtransform.panels.utils.SourceTranslation;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
@@ -20,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BDVStacking< T extends NumericType< T > &NativeType< T >> {
+    private final TranslationPanel translationPanel;
     private Source<?> spimSource;
     private List<AffineTransform3D> affineTransform3DList;
     private AffineTransform3D currentTransformation;
@@ -38,7 +42,6 @@ public class BDVStacking< T extends NumericType< T > &NativeType< T >> {
         affineTransform3DList = new ArrayList<>();
         for(int i = 0;i<paths.length;i++)
             affineTransform3DList.add(new AffineTransform3D());
-
         currentTransformation = affineTransform3DList.get(0);
 
 ////            transform3D.scale(4);
@@ -58,16 +61,33 @@ public class BDVStacking< T extends NumericType< T > &NativeType< T >> {
                     public void setSource(int i) {
                         spimSource = bdv.getSources().get(i).getSpimSource();
                         currentTransformation = affineTransform3DList.get(i);
+                        notifyPanels();
                     }
                 }),
                 false,
                 new Insets(0, 4, 0, 0));
-
+        this.translationPanel = new TranslationPanel(currentTransformation, new SourceTranslation() {
+            @Override
+            public void setTranslation(double[] translation) {
+                currentTransformation.translate(translation);
+                ((TransformedSource<?>) spimSource).setFixedTransform(currentTransformation);
+                bdv.getBdvHandle().getViewerPanel().requestRepaint();
+            }
+        });
+        cardPanel.addCard("TranslationPanel",
+                "Translate",
+                translationPanel,
+                false,
+                new Insets(0, 4, 0, 0));
 
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_VIEWERMODES_CARD, false);
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCES_CARD, false);
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD, false);
 
+    }
+
+    private void notifyPanels() {
+        this.translationPanel.onNotify(currentTransformation);
     }
 
     public static void main(String[] args) throws IOException {

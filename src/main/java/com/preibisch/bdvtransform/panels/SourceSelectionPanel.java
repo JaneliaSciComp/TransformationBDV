@@ -17,10 +17,7 @@ public class SourceSelectionPanel extends JPanel implements ActionListener {
 
     public <T extends NumericType< T > & NativeType< T >> SourceSelectionPanel(List<SourceAndConverter<T>> sources, SourceSelector sourceSelector) {
 
-//        super(new BorderLayout() );
         super(new GridLayout(0,1));
-//        JPanel mainPanel = new JPanel();
-//        heightFieldMagnitudePanel.add(new SourceSelectionPanel(), BorderLayout.CENTER);
         ButtonGroup group = new ButtonGroup();
         for (int i = 0; i < sources.size(); i++) {
             String name = sources.get(i).getSpimSource().getName();

@@ -1,5 +1,6 @@
 package com.preibisch.bdvtransform.panels;
 
+import com.preibisch.bdvtransform.panels.BDVCardPanel;
 import com.preibisch.bdvtransform.panels.utils.TransformationUpdater;
 import net.imglib2.realtransform.AffineTransform3D;
 
@@ -8,7 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class TranslationPanel extends BDVCardPanel implements ActionListener {
+public class FlipPanel extends BDVCardPanel implements ActionListener {
     private final TransformationUpdater updater;
     private AffineTransform3D transform;
     private JTextField tx;
@@ -16,9 +17,8 @@ public class TranslationPanel extends BDVCardPanel implements ActionListener {
     private JTextField tz;
 
 
-    public TranslationPanel(AffineTransform3D transform, TransformationUpdater updater) {
-        super("TranslationPanel",
-                "Translate", new GridLayout(0, 1));
+    public FlipPanel(AffineTransform3D transform, TransformationUpdater updater) {
+        super("FlipPanel", "Flip", new GridLayout(0, 1));
         this.transform = transform;
         this.updater = updater;
         double[] translations = transform.getTranslation();

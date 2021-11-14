@@ -63,22 +63,12 @@ public class AxisPermutationPanel extends BDVCardPanel implements ActionListener
             double[] positionY = getPosition(y);
             double[] positionZ = getPosition(z);
 
-//            MatrixOperation.print(transform.g);
             double[][] permutationMatrix = {positionX, positionY, positionZ};
 
             double[][] oldTransformation = MatrixOperation.toMatrix(transform.getRowPackedCopy(), 4);
 
-            System.out.println("Permutation Matrix: ");
-            MatrixOperation.print(permutationMatrix);
-            System.out.println("Old Matrix: ");
-            MatrixOperation.print(oldTransformation);
-
             double[] newTranslation = reorder(transform.getTranslation(), new int[]{x, y, z});
-
-
             double[][] newTransformation = MatrixOperation.multiplyMatrices(oldTransformation, permutationMatrix);
-            System.out.println("New  Matrix: ");
-            MatrixOperation.print(newTransformation);
             double[] listTransformation = MatrixOperation.flatMatrix(newTransformation);
 
             this.transform.set(listTransformation);
@@ -87,7 +77,6 @@ public class AxisPermutationPanel extends BDVCardPanel implements ActionListener
         } catch (Exception exception) {
             exception.printStackTrace();
         }
-
     }
 
     private double[] reorder(double[] translation, int[] positions) {

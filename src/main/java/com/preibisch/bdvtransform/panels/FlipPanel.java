@@ -1,6 +1,6 @@
 package com.preibisch.bdvtransform.panels;
 
-import com.preibisch.bdvtransform.panels.BDVCardPanel;
+import com.preibisch.bdvtransform.panels.utils.MatrixOperation;
 import com.preibisch.bdvtransform.panels.utils.TransformationUpdater;
 import net.imglib2.realtransform.AffineTransform3D;
 
@@ -12,28 +12,27 @@ import java.awt.event.ActionListener;
 public class FlipPanel extends BDVCardPanel implements ActionListener {
     private final TransformationUpdater updater;
     private AffineTransform3D transform;
-    private JTextField tx;
-    private JTextField ty;
-    private JTextField tz;
+    private JCheckBox fx;
+    private JCheckBox fy;
+    private JCheckBox fz;
 
 
     public FlipPanel(AffineTransform3D transform, TransformationUpdater updater) {
         super("FlipPanel", "Flip", new GridLayout(0, 1));
         this.transform = transform;
         this.updater = updater;
-        double[] translations = transform.getTranslation();
-        this.tx = new JTextField(String.valueOf(translations[0]));
-        this.ty = new JTextField(String.valueOf(translations[1]));
-        this.tz = new JTextField(String.valueOf(translations[2]));
-        this.add(getPanel("Tx: ", this.tx));
-        this.add(getPanel("Ty: ", this.ty));
-        this.add(getPanel("Tz: ", this.tz));
+        this.fx = new JCheckBox();
+        this.fy = new JCheckBox();
+        this.fz = new JCheckBox();
+        this.add(getPanel("Tx: ", this.fx));
+        this.add(getPanel("Ty: ", this.fy));
+        this.add(getPanel("Tz: ", this.fz));
         JButton updateButton = new JButton("Update");
         updateButton.addActionListener(this);
         this.add(updateButton);
     }
 
-    private JPanel getPanel(String s, JTextField field) {
+    private JPanel getPanel(String s, JComponent field) {
         JPanel p = new JPanel(new GridLayout(0, 2));
         p.add(new JLabel(s));
         p.add(field);
@@ -41,10 +40,9 @@ public class FlipPanel extends BDVCardPanel implements ActionListener {
     }
 
     private void updateView() {
-        double[] translations = transform.getTranslation();
-        tx.setText(String.valueOf(translations[0]));
-        ty.setText(String.valueOf(translations[1]));
-        tz.setText(String.valueOf(translations[2]));
+        fx.setSelected(false);
+        fy.setSelected(false);
+        fz.setSelected(false);
     }
 
     @Override
@@ -55,11 +53,44 @@ public class FlipPanel extends BDVCardPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        double x = Double.parseDouble(tx.getText());
-        double y = Double.parseDouble(ty.getText());
-        double z = Double.parseDouble(tz.getText());
-        double[] newTranslation = {x, y, z};
-        this.transform.setTranslation(newTranslation);
-        updater.setTransformation(this.transform);
+        try {
+            double[] x = putInList(0,getValue(fx.isSelected()));
+            double[] y = putInList(1,getValue(fy.isSelected()));
+            double[] z = putInList(2,getValue(fz.isSelected()));
+
+            double[][] flipMatrix = {x, y, z};
+            double[][] oldTransformation = MatrixOperation.toMatrix(transform.getRowPackedCopy(), 4);
+
+            double[] oldTranslation = transform.getTranslation();
+            double[][] newTransformation = MatrixOperation.multiplyMatrices(oldTransformation, flipMatrix);
+            double[] listTransformation = MatrixOperation.flatMatrix(newTransformation);
+
+            this.transform.set(listTransformation);
+            this.transform.setTranslation(oldTranslation);
+            updater.setTransformation(this.transform);
+            updateView();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    private double getValue(boolean selected) {
+        if(selected)
+            return -1;
+        else
+            return 1;
+    }
+
+    private double[] putInList(int pos,double value) throws Exception {
+        switch (pos) {
+            case 0:
+                return new double[]{value, 0, 0, 0};
+            case 1:
+                return new double[]{0, value, 0, 0};
+            case 2:
+                return new double[]{0, 0, value, 0};
+            default:
+                throw new Exception("Invalid axe position " + pos);
+        }
     }
 }

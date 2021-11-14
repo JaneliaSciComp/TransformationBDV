@@ -7,6 +7,6 @@ Using :
 - Template-Building https://github.com/saalfeldlab/template-building
 
 TODO:
-Fix translation matrix after running
-Continue axes reorder
-finish scaling
+Test transformations
+Add random colors
+Export Transformation

@@ -15,6 +15,10 @@ public abstract class BDVCardPanel extends JPanel {
         this.title = title;
     }
 
+    public void setSource(int sourceId) {
+
+    }
+
     public abstract void onNotify(AffineTransform3D transform);
 
     public String getKey() {

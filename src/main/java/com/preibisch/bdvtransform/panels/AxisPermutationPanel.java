@@ -73,7 +73,7 @@ public class AxisPermutationPanel extends BDVCardPanel implements ActionListener
 
             this.transform.set(listTransformation);
             this.transform.setTranslation(newTranslation);
-            updater.setTransformation(this.transform);
+            updater.setTransformation(this.transform,this);
         } catch (Exception exception) {
             exception.printStackTrace();
         }

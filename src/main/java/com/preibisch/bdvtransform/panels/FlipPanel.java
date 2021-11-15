@@ -67,7 +67,7 @@ public class FlipPanel extends BDVCardPanel implements ActionListener {
 
             this.transform.set(listTransformation);
             this.transform.setTranslation(oldTranslation);
-            updater.setTransformation(this.transform);
+            updater.setTransformation(this.transform,this);
             updateView();
         } catch (Exception exception) {
             exception.printStackTrace();

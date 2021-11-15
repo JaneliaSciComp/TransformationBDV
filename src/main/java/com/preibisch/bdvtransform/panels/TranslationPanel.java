@@ -60,6 +60,6 @@ public class TranslationPanel extends BDVCardPanel implements ActionListener {
         double z = Double.parseDouble(tz.getText());
         double[] newTranslation = {x, y, z};
         this.transform.setTranslation(newTranslation);
-        updater.setTransformation(this.transform);
+        updater.setTransformation(this.transform,this);
     }
 }

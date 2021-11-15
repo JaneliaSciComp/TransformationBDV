@@ -58,7 +58,7 @@ public class RotationPanel extends BDVCardPanel implements ActionListener {
         if (x > 0) this.transform.rotate(0, x);
         if (y > 0) this.transform.rotate(1, y);
         if (z > 0) this.transform.rotate(2, z);
-        updater.setTransformation(this.transform);
+        updater.setTransformation(this.transform,this);
         updateView();
     }
 }

@@ -46,7 +46,7 @@ public class ScalingPanel extends BDVCardPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         double x = Double.parseDouble(scale.getText());
         this.transform.scale(x);
-        updater.setTransformation(this.transform);
+        updater.setTransformation(this.transform,this);
         updateView();
     }
 }

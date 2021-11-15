@@ -11,6 +11,7 @@ import com.preibisch.bdvtransform.panels.AxisPermutationPanel;
 import com.preibisch.bdvtransform.panels.BDVCardPanel;
 import com.preibisch.bdvtransform.panels.ExportTransformationPanel;
 import com.preibisch.bdvtransform.panels.FlipPanel;
+import com.preibisch.bdvtransform.panels.RandomColorPanel;
 import com.preibisch.bdvtransform.panels.RotationPanel;
 import com.preibisch.bdvtransform.panels.ScalingPanel;
 import com.preibisch.bdvtransform.panels.SourceSelectionPanel;
@@ -41,6 +42,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 
         final BdvStackSource<T> bdv = BdvFunctions.show((RandomAccessibleInterval<T>) BioImageReader.loadImage(paths[0]), new File(paths[0]).getName());
+
         spimSource = bdv.getSources().get(0).getSpimSource();
 
         for (int i = 1; i < paths.length; i++) {
@@ -54,13 +56,6 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         for (int i = 0; i < paths.length; i++)
             affineTransform3DList.add(new AffineTransform3D());
         sourceId = 0;
-
-////            transform3D.scale(4);
-//            transform3D.translate();
-////                            transform3D.setTranslation(1.027752,0.142380,0.003838,-0.111033,1.086820,0.001491,0.006316,-0.055135,0.990582,1.065162,1.774045,1.281561);
-//        ((TransformedSource<?>) spimSource).setFixedTransform(transform3D);
-//        transform3D.set(0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0,0.0);
-
         TransformationUpdater updater = new TransformationUpdater() {
             @Override
             public void setTransformation(AffineTransform3D transformation, BDVCardPanel source) {

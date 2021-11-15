@@ -1,9 +1,8 @@
-package com.preibisch.bdvtransform;
+package com.preibisch.bdvtransform.panels;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
 import bdv.util.BdvStackSource;
-import com.preibisch.bdvtransform.panels.BDVCardPanel;
 import com.preibisch.bdvtransform.panels.utils.ColorStream;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;

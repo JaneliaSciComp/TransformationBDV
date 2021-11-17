@@ -7,6 +7,8 @@ import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import bdv.viewer.Source;
+import bdv.viewer.ViewerStateChange;
+import bdv.viewer.ViewerStateChangeListener;
 import com.preibisch.bdvtransform.panels.AxisPermutationPanel;
 import com.preibisch.bdvtransform.panels.BDVCardPanel;
 import com.preibisch.bdvtransform.panels.ExportTransformationPanel;
@@ -50,6 +52,23 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
             bdv.getSources().addAll(source.getSources());
             bdv.getConverterSetups().addAll(source.getConverterSetups());
         }
+
+        bdv.getBdvHandle().getViewerPanel().state().changeListeners().add(new ViewerStateChangeListener() {
+            @Override
+            public void viewerStateChanged(ViewerStateChange viewerStateChange) {
+                System.out.println("Viewer state changed: "+viewerStateChange.toString());
+                if(viewerStateChange.name().equals(ViewerStateChange.CURRENT_SOURCE_CHANGED.name())){
+                    Source<?> currentSource = bdv.getBdvHandle().getViewerPanel().state().getCurrentSource().getSpimSource();
+                    for (int i = 0; i < bdv.getSources().size(); i++) {
+
+                        if (bdv.getSources().get(i).getSpimSource().equals(currentSource)){
+                            System.out.println("Current souce is: "+currentSource.getName());
+                            System.out.println("Position : "+i);
+                            break;
+                        }
+                    }}
+            }
+        });
         affineTransform3DList = new ArrayList<>();
         controlPanels = new ArrayList<>();
         for (int i = 0; i < paths.length; i++)

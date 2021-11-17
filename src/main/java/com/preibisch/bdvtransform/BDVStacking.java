@@ -1,6 +1,5 @@
 package com.preibisch.bdvtransform;
 
-import bdv.tools.transformation.ManualTransformActiveListener;
 import bdv.tools.transformation.TransformedSource;
 import bdv.ui.BdvDefaultCards;
 import bdv.ui.CardPanel;
@@ -17,6 +16,7 @@ import com.preibisch.bdvtransform.panels.RandomColorPanel;
 import com.preibisch.bdvtransform.panels.RotationPanel;
 import com.preibisch.bdvtransform.panels.ScalingPanel;
 import com.preibisch.bdvtransform.panels.TranslationPanel;
+import com.preibisch.bdvtransform.panels.UndoPanel;
 import com.preibisch.bdvtransform.panels.utils.MatrixOperation;
 import com.preibisch.bdvtransform.panels.utils.TransformationUpdater;
 import net.imglib2.RandomAccessibleInterval;
@@ -36,6 +36,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
     private Source<?> spimSource;
     private int sourceId;
     private List<AffineTransform3D> affineTransform3DList;
+    private AffineTransform3D oldTransform;
 
     public BDVStacking(String... paths) throws IOException {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
@@ -51,7 +52,6 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         }
 
         bdv.getBdvHandle().getViewerPanel().state().changeListeners().add(viewerStateChange -> {
-            System.out.println("Viewer state changed: " + viewerStateChange.toString());
             if (viewerStateChange.name().equals(ViewerStateChange.CURRENT_SOURCE_CHANGED.name())) {
                 Source<?> currentSource = bdv.getBdvHandle().getViewerPanel().state().getCurrentSource().getSpimSource();
                 for (int i = 0; i < bdv.getSources().size(); i++) {
@@ -61,6 +61,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                         sourceId = i;
                         spimSource = bdv.getSources().get(i).getSpimSource();
                         notifyPanels();
+                        oldTransform = affineTransform3DList.get(sourceId);
                         break;
                     }
                 }
@@ -74,26 +75,26 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
             affineTransform3DList.add(transformation);
         }
         sourceId = 0;
+        oldTransform = affineTransform3DList.get(sourceId);
         TransformationUpdater updater = (transformation, source) -> {
             System.out.println("New Transformation: ");
             MatrixOperation.print(MatrixOperation.toMatrix(transformation.getRowPackedCopy(), 4));
+            oldTransform = affineTransform3DList.get(sourceId);
             affineTransform3DList.set(sourceId, transformation);
             ((TransformedSource<?>) spimSource).setFixedTransform(transformation);
             bdv.getBdvHandle().getViewerPanel().requestRepaint();
             notifyPanels();
         };
 
-        bdv.getBdvHandle().getManualTransformEditor().manualTransformActiveListeners().add(new ManualTransformActiveListener() {
-            @Override
-            public void manualTransformActiveChanged(boolean b) {
-                if(!b){
-                    System.out.println("Manual Transformed: ");
-                    AffineTransform3D newTransform = new AffineTransform3D();
-                    bdv.getSources().get(0).getSpimSource().getSourceTransform(0, 0, newTransform);
-                    MatrixOperation.print(MatrixOperation.toMatrix(newTransform.getRowPackedCopy(), 4));
-                    affineTransform3DList.set(sourceId,newTransform);
-                    notifyPanels();
-                }
+        bdv.getBdvHandle().getManualTransformEditor().manualTransformActiveListeners().add(b -> {
+            if (!b) {
+                System.out.println("Manual Transformed: ");
+                AffineTransform3D newTransform = new AffineTransform3D();
+                bdv.getSources().get(0).getSpimSource().getSourceTransform(0, 0, newTransform);
+                MatrixOperation.print(MatrixOperation.toMatrix(newTransform.getRowPackedCopy(), 4));
+                oldTransform = affineTransform3DList.get(sourceId);
+                affineTransform3DList.set(sourceId, newTransform);
+                notifyPanels();
             }
         });
 
@@ -104,13 +105,23 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                 false,
                 new Insets(0, 4, 0, 0));
 
+        cardPanel.addCard("UndoPanel", "Undo", new UndoPanel(e -> {
+                    affineTransform3DList.set(sourceId, oldTransform);
+                    ((TransformedSource<?>) spimSource).setFixedTransform(affineTransform3DList.get(sourceId));
+                    bdv.getBdvHandle().getViewerPanel().requestRepaint();
+                    notifyPanels();
+                }), true,
+                new Insets(0, 4, 0, 0));
+
         controlPanels = new ArrayList<>();
-        this.controlPanels.add(new TranslationPanel(affineTransform3DList.get(sourceId), updater));
-        this.controlPanels.add(new ScalingPanel(affineTransform3DList.get(sourceId), updater));
-        this.controlPanels.add(new RotationPanel(affineTransform3DList.get(sourceId), updater));
-        this.controlPanels.add(new FlipPanel(affineTransform3DList.get(sourceId), updater));
-        this.controlPanels.add(new AxisPermutationPanel(affineTransform3DList.get(sourceId), updater));
-        this.controlPanels.add(new ExportTransformationPanel(affineTransform3DList.get(sourceId), updater));
+
+        AffineTransform3D currentTransformation = affineTransform3DList.get(sourceId).copy();
+        this.controlPanels.add(new TranslationPanel(currentTransformation, updater));
+        this.controlPanels.add(new ScalingPanel(currentTransformation, updater));
+        this.controlPanels.add(new RotationPanel(currentTransformation, updater));
+        this.controlPanels.add(new FlipPanel(currentTransformation, updater));
+        this.controlPanels.add(new AxisPermutationPanel(currentTransformation, updater));
+        this.controlPanels.add(new ExportTransformationPanel(currentTransformation, updater));
 
         this.controlPanels.forEach(p -> cardPanel.addCard(p.getKey(),
                 p.getTitle(),
@@ -126,7 +137,8 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
     }
 
     private void notifyPanels() {
-        this.controlPanels.forEach(p -> p.onNotify(affineTransform3DList.get(sourceId)));
+        AffineTransform3D currentTransformation = affineTransform3DList.get(sourceId).copy();
+        this.controlPanels.forEach(p -> p.onNotify(currentTransformation));
     }
 
     public static void main(String[] args) throws IOException {

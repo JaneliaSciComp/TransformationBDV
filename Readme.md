@@ -7,6 +7,4 @@ Using :
 - Template-Building https://github.com/saalfeldlab/template-building
 
 TODO:
-Test transformations
-Add random colors
-Export Transformation
+Next undo

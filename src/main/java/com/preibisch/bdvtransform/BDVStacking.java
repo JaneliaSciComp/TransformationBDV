@@ -16,7 +16,6 @@ import com.preibisch.bdvtransform.panels.RotationPanel;
 import com.preibisch.bdvtransform.panels.ScalingPanel;
 import com.preibisch.bdvtransform.panels.SourceSelectionPanel;
 import com.preibisch.bdvtransform.panels.TranslationPanel;
-import com.preibisch.bdvtransform.panels.UndoPanel;
 import com.preibisch.bdvtransform.panels.utils.MatrixOperation;
 import com.preibisch.bdvtransform.panels.utils.TransformationUpdater;
 import net.imglib2.RandomAccessibleInterval;
@@ -32,7 +31,7 @@ import java.util.List;
 
 public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
     private final List<BDVCardPanel> controlPanels;
-    private final UndoPanel undoPanel;
+
 
     private Source<?> spimSource;
     private int sourceId;
@@ -64,29 +63,10 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                 affineTransform3DList.set(sourceId, transformation);
                 ((TransformedSource<?>) spimSource).setFixedTransform(transformation);
                 bdv.getBdvHandle().getViewerPanel().requestRepaint();
-                if(!source.getClass().equals(UndoPanel.class)){
-                    undoPanel.addTransformation(transformation,sourceId);}
-            }
-
-            @Override
-            public void setAllTransformation(List<AffineTransform3D> allTransformation, BDVCardPanel source) {
-                System.out.println("Set all transformations: ");
-                affineTransform3DList = allTransformation;
-                for (int i = 0; i < bdv.getSources().size(); i++) {
-                    MatrixOperation.print(MatrixOperation.toMatrix(allTransformation.get(i).getRowPackedCopy(),4));
-                    ((TransformedSource<?>) bdv.getSources().get(i).getSpimSource()).setFixedTransform(allTransformation.get(i));
-                }
-                bdv.getBdvHandle().getViewerPanel().requestRepaint();
             }
         };
 
-
         final CardPanel cardPanel = bdv.getBdvHandle().getCardPanel();
-
-        this.undoPanel = new UndoPanel(affineTransform3DList,sourceId,updater);
-
-        cardPanel.addCard("Undo Panel","Undo / Redo",undoPanel,true,
-                new Insets(0, 4, 0, 0));
 
         cardPanel.addCard("ColorPanel", "RandomColor",
                 new RandomColorPanel(bdv).click(),
@@ -102,9 +82,6 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                 }),
                 false,
                 new Insets(0, 4, 0, 0));
-
-
-
 
         this.controlPanels.add(new TranslationPanel(affineTransform3DList.get(sourceId), updater));
         this.controlPanels.add(new ScalingPanel(affineTransform3DList.get(sourceId), updater));

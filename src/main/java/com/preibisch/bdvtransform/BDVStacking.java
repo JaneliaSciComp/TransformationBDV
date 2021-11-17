@@ -1,5 +1,6 @@
 package com.preibisch.bdvtransform;
 
+import bdv.tools.transformation.ManualTransformActiveListener;
 import bdv.tools.transformation.TransformedSource;
 import bdv.ui.BdvDefaultCards;
 import bdv.ui.CardPanel;
@@ -66,7 +67,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
             }
         });
         affineTransform3DList = new ArrayList<>();
-        controlPanels = new ArrayList<>();
+
         for (int i = 0; i < paths.length; i++) {
             AffineTransform3D transformation = new AffineTransform3D();
             bdv.getSources().get(i).getSpimSource().getSourceTransform(0, 0, transformation);
@@ -81,6 +82,19 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
             bdv.getBdvHandle().getViewerPanel().requestRepaint();
         };
 
+        bdv.getBdvHandle().getManualTransformEditor().manualTransformActiveListeners().add(new ManualTransformActiveListener() {
+            @Override
+            public void manualTransformActiveChanged(boolean b) {
+                if(!b){
+                    System.out.println("Manual Transformed: ");
+                    AffineTransform3D newTransform = new AffineTransform3D();
+                    bdv.getSources().get(0).getSpimSource().getSourceTransform(0, 0, newTransform);
+                    MatrixOperation.print(MatrixOperation.toMatrix(newTransform.getRowPackedCopy(), 4));
+                    affineTransform3DList.set(sourceId,newTransform);
+                }
+            }
+        });
+
         final CardPanel cardPanel = bdv.getBdvHandle().getCardPanel();
 
         cardPanel.addCard("ColorPanel", "RandomColor",
@@ -88,6 +102,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                 false,
                 new Insets(0, 4, 0, 0));
 
+        controlPanels = new ArrayList<>();
         this.controlPanels.add(new TranslationPanel(affineTransform3DList.get(sourceId), updater));
         this.controlPanels.add(new ScalingPanel(affineTransform3DList.get(sourceId), updater));
         this.controlPanels.add(new RotationPanel(affineTransform3DList.get(sourceId), updater));

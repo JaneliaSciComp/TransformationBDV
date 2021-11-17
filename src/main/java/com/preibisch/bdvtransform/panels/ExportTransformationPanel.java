@@ -20,7 +20,7 @@ public class ExportTransformationPanel extends BDVCardPanel implements ActionLis
         super("ExportPanel", "Export Transformation", new GridLayout(0, 1));
         this.transform = transform;
         this.updater = updater;
-        JButton updateButton = new JButton("Update");
+        JButton updateButton = new JButton("Save");
         updateButton.addActionListener(this);
         this.add(updateButton);
     }

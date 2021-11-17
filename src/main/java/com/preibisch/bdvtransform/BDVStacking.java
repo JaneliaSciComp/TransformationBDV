@@ -17,6 +17,7 @@ import com.preibisch.bdvtransform.panels.RandomColorPanel;
 import com.preibisch.bdvtransform.panels.RotationPanel;
 import com.preibisch.bdvtransform.panels.ScalingPanel;
 import com.preibisch.bdvtransform.panels.TranslationPanel;
+import com.preibisch.bdvtransform.panels.UndoPanel;
 import com.preibisch.bdvtransform.panels.utils.MatrixOperation;
 import com.preibisch.bdvtransform.panels.utils.TransformationUpdater;
 import net.imglib2.RandomAccessibleInterval;
@@ -90,13 +91,13 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         bdv.getBdvHandle().getManualTransformEditor().manualTransformActiveListeners().add(new ManualTransformActiveListener() {
             @Override
             public void manualTransformActiveChanged(boolean b) {
-                if(!b){
+                if (!b) {
                     System.out.println("Manual Transformed: ");
                     AffineTransform3D newTransform = new AffineTransform3D();
                     bdv.getSources().get(0).getSpimSource().getSourceTransform(0, 0, newTransform);
                     MatrixOperation.print(MatrixOperation.toMatrix(newTransform.getRowPackedCopy(), 4));
                     oldTransform = affineTransform3DList.get(sourceId);
-                    affineTransform3DList.set(sourceId,newTransform);
+                    affineTransform3DList.set(sourceId, newTransform);
                     notifyPanels();
                 }
             }
@@ -107,6 +108,14 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         cardPanel.addCard("ColorPanel", "RandomColor",
                 new RandomColorPanel(bdv).click(),
                 false,
+                new Insets(0, 4, 0, 0));
+
+        cardPanel.addCard("UndoPanel", "Undo", new UndoPanel(e -> {
+                    affineTransform3DList.set(sourceId, oldTransform);
+                    ((TransformedSource<?>) spimSource).setFixedTransform(affineTransform3DList.get(sourceId));
+                    bdv.getBdvHandle().getViewerPanel().requestRepaint();
+                    notifyPanels();
+                }), true,
                 new Insets(0, 4, 0, 0));
 
         controlPanels = new ArrayList<>();

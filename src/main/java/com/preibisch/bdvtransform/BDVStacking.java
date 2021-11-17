@@ -1,6 +1,5 @@
 package com.preibisch.bdvtransform;
 
-import bdv.tools.transformation.ManualTransformActiveListener;
 import bdv.tools.transformation.TransformedSource;
 import bdv.ui.BdvDefaultCards;
 import bdv.ui.CardPanel;
@@ -53,7 +52,6 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         }
 
         bdv.getBdvHandle().getViewerPanel().state().changeListeners().add(viewerStateChange -> {
-            System.out.println("Viewer state changed: " + viewerStateChange.toString());
             if (viewerStateChange.name().equals(ViewerStateChange.CURRENT_SOURCE_CHANGED.name())) {
                 Source<?> currentSource = bdv.getBdvHandle().getViewerPanel().state().getCurrentSource().getSpimSource();
                 for (int i = 0; i < bdv.getSources().size(); i++) {
@@ -88,18 +86,15 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
             notifyPanels();
         };
 
-        bdv.getBdvHandle().getManualTransformEditor().manualTransformActiveListeners().add(new ManualTransformActiveListener() {
-            @Override
-            public void manualTransformActiveChanged(boolean b) {
-                if (!b) {
-                    System.out.println("Manual Transformed: ");
-                    AffineTransform3D newTransform = new AffineTransform3D();
-                    bdv.getSources().get(0).getSpimSource().getSourceTransform(0, 0, newTransform);
-                    MatrixOperation.print(MatrixOperation.toMatrix(newTransform.getRowPackedCopy(), 4));
-                    oldTransform = affineTransform3DList.get(sourceId);
-                    affineTransform3DList.set(sourceId, newTransform);
-                    notifyPanels();
-                }
+        bdv.getBdvHandle().getManualTransformEditor().manualTransformActiveListeners().add(b -> {
+            if (!b) {
+                System.out.println("Manual Transformed: ");
+                AffineTransform3D newTransform = new AffineTransform3D();
+                bdv.getSources().get(0).getSpimSource().getSourceTransform(0, 0, newTransform);
+                MatrixOperation.print(MatrixOperation.toMatrix(newTransform.getRowPackedCopy(), 4));
+                oldTransform = affineTransform3DList.get(sourceId);
+                affineTransform3DList.set(sourceId, newTransform);
+                notifyPanels();
             }
         });
 
@@ -119,12 +114,14 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                 new Insets(0, 4, 0, 0));
 
         controlPanels = new ArrayList<>();
-        this.controlPanels.add(new TranslationPanel(affineTransform3DList.get(sourceId), updater));
-        this.controlPanels.add(new ScalingPanel(affineTransform3DList.get(sourceId), updater));
-        this.controlPanels.add(new RotationPanel(affineTransform3DList.get(sourceId), updater));
-        this.controlPanels.add(new FlipPanel(affineTransform3DList.get(sourceId), updater));
-        this.controlPanels.add(new AxisPermutationPanel(affineTransform3DList.get(sourceId), updater));
-        this.controlPanels.add(new ExportTransformationPanel(affineTransform3DList.get(sourceId), updater));
+
+        AffineTransform3D currentTransformation = affineTransform3DList.get(sourceId).copy();
+        this.controlPanels.add(new TranslationPanel(currentTransformation, updater));
+        this.controlPanels.add(new ScalingPanel(currentTransformation, updater));
+        this.controlPanels.add(new RotationPanel(currentTransformation, updater));
+        this.controlPanels.add(new FlipPanel(currentTransformation, updater));
+        this.controlPanels.add(new AxisPermutationPanel(currentTransformation, updater));
+        this.controlPanels.add(new ExportTransformationPanel(currentTransformation, updater));
 
         this.controlPanels.forEach(p -> cardPanel.addCard(p.getKey(),
                 p.getTitle(),
@@ -140,7 +137,8 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
     }
 
     private void notifyPanels() {
-        this.controlPanels.forEach(p -> p.onNotify(affineTransform3DList.get(sourceId)));
+        AffineTransform3D currentTransformation = affineTransform3DList.get(sourceId).copy();
+        this.controlPanels.forEach(p -> p.onNotify(currentTransformation));
     }
 
     public static void main(String[] args) throws IOException {

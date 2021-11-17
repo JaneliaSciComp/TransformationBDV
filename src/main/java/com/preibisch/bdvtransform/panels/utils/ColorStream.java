@@ -96,7 +96,7 @@ public class ColorStream
     {
         return new Iterator< ARGBType >()
         {
-            long i = -1;
+            long i = 0;
 
             @Override
             public boolean hasNext()

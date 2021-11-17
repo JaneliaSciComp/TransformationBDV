@@ -133,6 +133,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCES_CARD, false);
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD, false);
 
+
         bdv.getBdvHandle().getViewerPanel().requestRepaint();
     }
 

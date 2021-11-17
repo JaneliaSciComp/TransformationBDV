@@ -80,6 +80,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
             affineTransform3DList.set(sourceId, transformation);
             ((TransformedSource<?>) spimSource).setFixedTransform(transformation);
             bdv.getBdvHandle().getViewerPanel().requestRepaint();
+            notifyPanels();
         };
 
         bdv.getBdvHandle().getManualTransformEditor().manualTransformActiveListeners().add(new ManualTransformActiveListener() {
@@ -91,6 +92,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                     bdv.getSources().get(0).getSpimSource().getSourceTransform(0, 0, newTransform);
                     MatrixOperation.print(MatrixOperation.toMatrix(newTransform.getRowPackedCopy(), 4));
                     affineTransform3DList.set(sourceId,newTransform);
+                    notifyPanels();
                 }
             }
         });

@@ -36,6 +36,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
     private Source<?> spimSource;
     private int sourceId;
     private List<AffineTransform3D> affineTransform3DList;
+    private AffineTransform3D oldTransform;
 
     public BDVStacking(String... paths) throws IOException {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
@@ -61,6 +62,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                         sourceId = i;
                         spimSource = bdv.getSources().get(i).getSpimSource();
                         notifyPanels();
+                        oldTransform = affineTransform3DList.get(sourceId);
                         break;
                     }
                 }
@@ -74,9 +76,11 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
             affineTransform3DList.add(transformation);
         }
         sourceId = 0;
+        oldTransform = affineTransform3DList.get(sourceId);
         TransformationUpdater updater = (transformation, source) -> {
             System.out.println("New Transformation: ");
             MatrixOperation.print(MatrixOperation.toMatrix(transformation.getRowPackedCopy(), 4));
+            oldTransform = affineTransform3DList.get(sourceId);
             affineTransform3DList.set(sourceId, transformation);
             ((TransformedSource<?>) spimSource).setFixedTransform(transformation);
             bdv.getBdvHandle().getViewerPanel().requestRepaint();
@@ -91,6 +95,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                     AffineTransform3D newTransform = new AffineTransform3D();
                     bdv.getSources().get(0).getSpimSource().getSourceTransform(0, 0, newTransform);
                     MatrixOperation.print(MatrixOperation.toMatrix(newTransform.getRowPackedCopy(), 4));
+                    oldTransform = affineTransform3DList.get(sourceId);
                     affineTransform3DList.set(sourceId,newTransform);
                     notifyPanels();
                 }

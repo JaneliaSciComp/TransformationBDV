@@ -50,24 +50,28 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         }
 
         bdv.getBdvHandle().getViewerPanel().state().changeListeners().add(viewerStateChange -> {
-            System.out.println("Viewer state changed: "+viewerStateChange.toString());
-            if(viewerStateChange.name().equals(ViewerStateChange.CURRENT_SOURCE_CHANGED.name())){
+            System.out.println("Viewer state changed: " + viewerStateChange.toString());
+            if (viewerStateChange.name().equals(ViewerStateChange.CURRENT_SOURCE_CHANGED.name())) {
                 Source<?> currentSource = bdv.getBdvHandle().getViewerPanel().state().getCurrentSource().getSpimSource();
                 for (int i = 0; i < bdv.getSources().size(); i++) {
 
-                    if (bdv.getSources().get(i).getSpimSource().equals(currentSource)){
-                        System.out.println("Current source is: "+currentSource.getName()+" | Position : "+i);
+                    if (bdv.getSources().get(i).getSpimSource().equals(currentSource)) {
+                        System.out.println("Current source is: " + currentSource.getName() + " | Position : " + i);
                         sourceId = i;
                         spimSource = bdv.getSources().get(i).getSpimSource();
                         notifyPanels();
                         break;
                     }
-                }}
+                }
+            }
         });
         affineTransform3DList = new ArrayList<>();
         controlPanels = new ArrayList<>();
-        for (int i = 0; i < paths.length; i++)
-            affineTransform3DList.add(new AffineTransform3D());
+        for (int i = 0; i < paths.length; i++) {
+            AffineTransform3D transformation = new AffineTransform3D();
+            bdv.getSources().get(i).getSpimSource().getSourceTransform(0, 0, transformation);
+            affineTransform3DList.add(transformation);
+        }
         sourceId = 0;
         TransformationUpdater updater = (transformation, source) -> {
             System.out.println("New Transformation: ");

@@ -1,5 +1,6 @@
 package com.preibisch.bdvtransform;
 
+import bdv.BigDataViewerActions;
 import bdv.tools.transformation.TransformedSource;
 import bdv.ui.BdvDefaultCards;
 import bdv.ui.CardPanel;
@@ -37,7 +38,8 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
 
     public BDVStacking(String... paths) throws IOException {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
-        final BdvStackSource<T> bdv = BdvFunctions.show((RandomAccessibleInterval<T>) BioImageReader.loadImage(paths[0]), new File(paths[0]).getName());
+        BdvOptions options = BdvOptions.options();
+        final BdvStackSource<T> bdv = BdvFunctions.show((RandomAccessibleInterval<T>) BioImageReader.loadImage(paths[0]), new File(paths[0]).getName(),options);
 
         for (int i = 1; i < paths.length; i++) {
             final RandomAccessibleInterval<T> img = BioImageReader.loadImage(paths[i]);
@@ -93,8 +95,9 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         this.controlPanels.add(new AxisPermutationPanel(currentTransformation, updater));
         this.controlPanels.add(new ExportTransformationPanel(currentTransformation, updater));
 
+        RandomColorPanel randomColor = new RandomColorPanel(bdv).click();
         cardPanel.addCard("ColorPanel", "RandomColor",
-                new RandomColorPanel(bdv).click(),
+                randomColor,
                 false,
                 new Insets(0, 4, 0, 0));
 
@@ -112,10 +115,14 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                 false,
                 new Insets(0, 4, 0, 0)));
 
+
+        BigDataViewerActions actions = new BigDataViewerActions(options.values.getInputTriggerConfig());
+        actions.runnableAction(() -> randomColor.click(),"Random Color", new String[]{"R"});
+
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_VIEWERMODES_CARD, false);
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCES_CARD, false);
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD, false);
-
+        actions.install( bdv.getBdvHandle().getKeybindings(), "my actions" );
         bdv.getBdvHandle().getViewerPanel().requestRepaint();
     }
 

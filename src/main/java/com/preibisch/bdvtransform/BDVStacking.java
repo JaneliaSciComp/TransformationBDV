@@ -6,7 +6,6 @@ import bdv.ui.CardPanel;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
-import bdv.viewer.Source;
 import bdv.viewer.ViewerStateChange;
 import com.preibisch.bdvtransform.panels.AxisPermutationPanel;
 import com.preibisch.bdvtransform.panels.BDVCardPanel;
@@ -31,18 +30,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
-    private final List<BDVCardPanel> controlPanels;
-
-    private Source<?> spimSource;
-    private int sourceId;
-    private List<AffineTransform3D> affineTransform3DList;
+    private final List<BDVCardPanel> controlPanels= new ArrayList<>();;
+    private int sourceId = 0;
+    private List<AffineTransform3D> affineTransform3DList = new ArrayList<>();
     private AffineTransform3D oldTransform;
 
     public BDVStacking(String... paths) throws IOException {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
-
         final BdvStackSource<T> bdv = BdvFunctions.show((RandomAccessibleInterval<T>) BioImageReader.loadImage(paths[0]), new File(paths[0]).getName());
-        spimSource = bdv.getSources().get(0).getSpimSource();
 
         for (int i = 1; i < paths.length; i++) {
             final RandomAccessibleInterval<T> img = BioImageReader.loadImage(paths[i]);
@@ -52,38 +47,28 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         }
 
         bdv.getBdvHandle().getViewerPanel().state().changeListeners().add(viewerStateChange -> {
-            if (viewerStateChange.name().equals(ViewerStateChange.CURRENT_SOURCE_CHANGED.name())) {
-                Source<?> currentSource = bdv.getBdvHandle().getViewerPanel().state().getCurrentSource().getSpimSource();
-                for (int i = 0; i < bdv.getSources().size(); i++) {
-
-                    if (bdv.getSources().get(i).getSpimSource().equals(currentSource)) {
-                        System.out.println("Current source is: " + currentSource.getName() + " | Position : " + i);
+            if (viewerStateChange.name().equals(ViewerStateChange.CURRENT_SOURCE_CHANGED.name()))
+                for (int i = 0; i < bdv.getSources().size(); i++)
+                    if (bdv.getSources().get(i).getSpimSource().equals(bdv.getBdvHandle().getViewerPanel().state().getCurrentSource().getSpimSource())) {
+                        System.out.println("Current source position : " + i);
                         sourceId = i;
-                        spimSource = bdv.getSources().get(i).getSpimSource();
                         notifyPanels();
                         oldTransform = affineTransform3DList.get(sourceId);
                         break;
                     }
-                }
-            }
         });
-        affineTransform3DList = new ArrayList<>();
 
         for (int i = 0; i < paths.length; i++) {
             AffineTransform3D transformation = new AffineTransform3D();
             bdv.getSources().get(i).getSpimSource().getSourceTransform(0, 0, transformation);
             affineTransform3DList.add(transformation);
         }
-        sourceId = 0;
+
         oldTransform = affineTransform3DList.get(sourceId);
         TransformationUpdater updater = (transformation, source) -> {
-            System.out.println("New Transformation: ");
-            MatrixOperation.print(MatrixOperation.toMatrix(transformation.getRowPackedCopy(), 4));
             oldTransform = affineTransform3DList.get(sourceId);
             affineTransform3DList.set(sourceId, transformation);
-            ((TransformedSource<?>) spimSource).setFixedTransform(transformation);
-            bdv.getBdvHandle().getViewerPanel().requestRepaint();
-            notifyPanels();
+            updateSourceTransformation(bdv, sourceId, transformation);
         };
 
         bdv.getBdvHandle().getManualTransformEditor().manualTransformActiveListeners().add(b -> {
@@ -100,21 +85,6 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
 
         final CardPanel cardPanel = bdv.getBdvHandle().getCardPanel();
 
-        cardPanel.addCard("ColorPanel", "RandomColor",
-                new RandomColorPanel(bdv).click(),
-                false,
-                new Insets(0, 4, 0, 0));
-
-        cardPanel.addCard("UndoPanel", "Undo", new UndoPanel(e -> {
-                    affineTransform3DList.set(sourceId, oldTransform);
-                    ((TransformedSource<?>) spimSource).setFixedTransform(affineTransform3DList.get(sourceId));
-                    bdv.getBdvHandle().getViewerPanel().requestRepaint();
-                    notifyPanels();
-                }), true,
-                new Insets(0, 4, 0, 0));
-
-        controlPanels = new ArrayList<>();
-
         AffineTransform3D currentTransformation = affineTransform3DList.get(sourceId).copy();
         this.controlPanels.add(new TranslationPanel(currentTransformation, updater));
         this.controlPanels.add(new ScalingPanel(currentTransformation, updater));
@@ -122,6 +92,19 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         this.controlPanels.add(new FlipPanel(currentTransformation, updater));
         this.controlPanels.add(new AxisPermutationPanel(currentTransformation, updater));
         this.controlPanels.add(new ExportTransformationPanel(currentTransformation, updater));
+
+        cardPanel.addCard("ColorPanel", "RandomColor",
+                new RandomColorPanel(bdv).click(),
+                false,
+                new Insets(0, 4, 0, 0));
+
+        cardPanel.addCard("UndoPanel", "Undo", new UndoPanel(e -> {
+                    affineTransform3DList.set(sourceId, oldTransform);
+                    ((TransformedSource<?>) bdv.getSources().get(sourceId).getSpimSource()).setFixedTransform(affineTransform3DList.get(sourceId));
+                    bdv.getBdvHandle().getViewerPanel().requestRepaint();
+                    notifyPanels();
+                }), true,
+                new Insets(0, 4, 0, 0));
 
         this.controlPanels.forEach(p -> cardPanel.addCard(p.getKey(),
                 p.getTitle(),
@@ -133,8 +116,15 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCES_CARD, false);
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD, false);
 
-
         bdv.getBdvHandle().getViewerPanel().requestRepaint();
+    }
+
+    private void updateSourceTransformation(BdvStackSource<T> bdv, int sourceId, AffineTransform3D transformation) {
+        System.out.println("New Transformation: ");
+        MatrixOperation.print(MatrixOperation.toMatrix(transformation.getRowPackedCopy(), 4));
+        ((TransformedSource<?>) bdv.getSources().get(sourceId).getSpimSource()).setFixedTransform(transformation);
+        bdv.getBdvHandle().getViewerPanel().requestRepaint();
+        notifyPanels();
     }
 
     private void notifyPanels() {

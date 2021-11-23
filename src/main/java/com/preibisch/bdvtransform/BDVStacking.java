@@ -7,7 +7,6 @@ import bdv.ui.CardPanel;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
-import bdv.viewer.ViewerStateChange;
 import com.preibisch.bdvtransform.panels.AxisPermutationPanel;
 import com.preibisch.bdvtransform.panels.BDVCardPanel;
 import com.preibisch.bdvtransform.panels.ExportTransformationPanel;
@@ -17,6 +16,7 @@ import com.preibisch.bdvtransform.panels.RotationPanel;
 import com.preibisch.bdvtransform.panels.ScalingPanel;
 import com.preibisch.bdvtransform.panels.TranslationPanel;
 import com.preibisch.bdvtransform.panels.UndoPanel;
+import com.preibisch.bdvtransform.panels.utils.BDVUtils;
 import com.preibisch.bdvtransform.panels.utils.MatrixOperation;
 import com.preibisch.bdvtransform.panels.utils.TransformationUpdater;
 import net.imglib2.RandomAccessibleInterval;
@@ -31,7 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
-    private final List<BDVCardPanel> controlPanels= new ArrayList<>();;
+    private final List<BDVCardPanel> controlPanels = new ArrayList<>();
+    ;
     private int sourceId = 0;
     private List<AffineTransform3D> affineTransform3DList = new ArrayList<>();
     private AffineTransform3D oldTransform;
@@ -39,7 +40,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
     public BDVStacking(String... paths) throws IOException {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         BdvOptions options = BdvOptions.options();
-        final BdvStackSource<T> bdv = BdvFunctions.show((RandomAccessibleInterval<T>) BioImageReader.loadImage(paths[0]), new File(paths[0]).getName(),options);
+        final BdvStackSource<T> bdv = BdvFunctions.show((RandomAccessibleInterval<T>) BioImageReader.loadImage(paths[0]), new File(paths[0]).getName(), options);
 
         for (int i = 1; i < paths.length; i++) {
             final RandomAccessibleInterval<T> img = BioImageReader.loadImage(paths[i]);
@@ -49,15 +50,17 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         }
 
         bdv.getBdvHandle().getViewerPanel().state().changeListeners().add(viewerStateChange -> {
-            if (viewerStateChange.name().equals(ViewerStateChange.CURRENT_SOURCE_CHANGED.name()))
-                for (int i = 0; i < bdv.getSources().size(); i++)
-                    if (bdv.getSources().get(i).getSpimSource().equals(bdv.getBdvHandle().getViewerPanel().state().getCurrentSource().getSpimSource())) {
-                        System.out.println("Current source position : " + i);
-                        sourceId = i;
-                        notifyPanels();
-                        oldTransform = affineTransform3DList.get(sourceId);
-                        break;
-                    }
+            if (bdv.getBdvHandle().getViewerPanel().state().getCurrentSource() == null)
+                return;
+
+            for (int i = 0; i < bdv.getSources().size(); i++)
+                if (bdv.getSources().get(i).getSpimSource().equals(bdv.getBdvHandle().getViewerPanel().state().getCurrentSource().getSpimSource())) {
+                    System.out.println("Current source position : " + i);
+                    sourceId = i;
+                    notifyPanels();
+                    oldTransform = affineTransform3DList.get(sourceId);
+                    break;
+                }
         });
 
         for (int i = 0; i < paths.length; i++) {
@@ -84,6 +87,9 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                 notifyPanels();
             }
         });
+
+
+        BDVUtils.initBrightness( bdv);
 
         final CardPanel cardPanel = bdv.getBdvHandle().getCardPanel();
 
@@ -117,8 +123,8 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
 
 
         BigDataViewerActions actions = new BigDataViewerActions(options.values.getInputTriggerConfig());
-        actions.runnableAction(() -> randomColor.click(),"Random Color", new String[]{"R"});
-        actions.install( bdv.getBdvHandle().getKeybindings(), "my actions" );
+        actions.runnableAction(() -> randomColor.click(), "Random Color", new String[]{"R"});
+        actions.install(bdv.getBdvHandle().getKeybindings(), "my actions");
 
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_VIEWERMODES_CARD, false);
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCES_CARD, false);

@@ -118,11 +118,12 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
 
         BigDataViewerActions actions = new BigDataViewerActions(options.values.getInputTriggerConfig());
         actions.runnableAction(() -> randomColor.click(),"Random Color", new String[]{"R"});
+        actions.install( bdv.getBdvHandle().getKeybindings(), "my actions" );
 
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_VIEWERMODES_CARD, false);
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCES_CARD, false);
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD, false);
-        actions.install( bdv.getBdvHandle().getKeybindings(), "my actions" );
+
         bdv.getBdvHandle().getViewerPanel().requestRepaint();
     }
 

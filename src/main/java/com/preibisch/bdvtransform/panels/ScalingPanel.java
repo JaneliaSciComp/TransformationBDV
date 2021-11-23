@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 
 public class ScalingPanel extends BDVCardPanel implements ActionListener {
     private final TransformationUpdater updater;
+    private final JCheckBox oneScale;
     private AffineTransform3D transform;
     private JTextField sx;
     private JTextField sy;
@@ -23,19 +24,31 @@ public class ScalingPanel extends BDVCardPanel implements ActionListener {
         this.sx = new JTextField(String.valueOf(1.0));
         this.sy = new JTextField(String.valueOf(1.0));
         this.sz = new JTextField(String.valueOf(1.0));
-        this.add(getPanel("Rx: ", this.sx));
-        this.add(getPanel("Ry: ", this.sy));
-        this.add(getPanel("Rz: ", this.sz));
+        this.oneScale = new JCheckBox();
+        oneScale.addItemListener(e -> {
+            modeChanged(oneScale.isSelected());
+        });
+        this.add(getPanel("",oneScale, "Same scale","",""));
+        this.add(getPanel("Sx: ", this.sx,"/1.0"));
+        this.add(getPanel("Sy: ", this.sy,"/1.0"));
+        this.add(getPanel("Sz: ", this.sz,"/1.0"));
         JButton updateButton = new JButton("Update");
         updateButton.addActionListener(this);
         this.add(updateButton);
     }
 
-    private JPanel getPanel(String s, JTextField field) {
-        JPanel p = new JPanel(new GridLayout(0, 3));
-        p.add(new JLabel(s));
-        p.add(field);
-        p.add(new Label("/1.0"));
+    private void modeChanged(boolean selected) {
+    }
+
+    private JPanel getPanel(Object... elements) {
+        JPanel p = new JPanel(new GridLayout(0, elements.length));
+        for (Object element :
+                elements) {
+            if (element.getClass().equals(String.class))
+                p.add(new JLabel((String) element));
+            else
+                p.add((JComponent) element);
+        }
         return p;
     }
 
@@ -56,8 +69,8 @@ public class ScalingPanel extends BDVCardPanel implements ActionListener {
         double x = Double.parseDouble(sx.getText());
         double y = Double.parseDouble(sy.getText());
         double z = Double.parseDouble(sz.getText());
-        this.transform.scale(x,y,z);
-        updater.setTransformation(this.transform,this);
+        this.transform.scale(x, y, z);
+        updater.setTransformation(this.transform, this);
         updateView();
     }
 }

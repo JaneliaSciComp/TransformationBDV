@@ -28,22 +28,31 @@ public class ScalingPanel extends BDVCardPanel implements ActionListener {
         oneScale.addItemListener(e -> {
             modeChanged(oneScale.isSelected());
         });
-        this.add(getPanel("",oneScale, "Same scale","",""));
-        this.add(getPanel("Sx: ", this.sx,"/1.0"));
-        this.add(getPanel("Sy: ", this.sy,"/1.0"));
-        this.add(getPanel("Sz: ", this.sz,"/1.0"));
+        this.add(getPanel("", oneScale, "Same scale", "", ""));
+        this.add(getPanel("Sx: ", this.sx, "/1.0"));
+        this.add(getPanel("Sy: ", this.sy, "/1.0"));
+        this.add(getPanel("Sz: ", this.sz, "/1.0"));
         JButton updateButton = new JButton("Update");
         updateButton.addActionListener(this);
         this.add(updateButton);
     }
 
-    private void modeChanged(boolean selected) {
+    private void modeChanged(boolean oneScale) {
+        setEditableOptions(sy, oneScale);
+        setEditableOptions(sz, oneScale);
+    }
+
+    private void setEditableOptions(JTextField field, boolean oneScale) {
+        field.setEditable(!oneScale);
+        if (oneScale)
+            field.setForeground(new Color(189, 195, 199));
+        else
+            field.setForeground(new Color(0, 0, 0));
     }
 
     private JPanel getPanel(Object... elements) {
         JPanel p = new JPanel(new GridLayout(0, elements.length));
-        for (Object element :
-                elements) {
+        for (Object element : elements) {
             if (element.getClass().equals(String.class))
                 p.add(new JLabel((String) element));
             else
@@ -66,10 +75,15 @@ public class ScalingPanel extends BDVCardPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        double x = Double.parseDouble(sx.getText());
-        double y = Double.parseDouble(sy.getText());
-        double z = Double.parseDouble(sz.getText());
-        this.transform.scale(x, y, z);
+        if (oneScale.isSelected()) {
+            double x = Double.parseDouble(sx.getText());
+            this.transform.scale(x);
+        } else {
+            double x = Double.parseDouble(sx.getText());
+            double y = Double.parseDouble(sy.getText());
+            double z = Double.parseDouble(sz.getText());
+            this.transform.scale(x, y, z);
+        }
         updater.setTransformation(this.transform, this);
         updateView();
     }

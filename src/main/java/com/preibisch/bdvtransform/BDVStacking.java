@@ -32,9 +32,8 @@ import java.util.List;
 
 public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
     private final List<BDVCardPanel> controlPanels = new ArrayList<>();
-    ;
     private int sourceId = 0;
-    private List<AffineTransform3D> affineTransform3DList = new ArrayList<>();
+    final private List<AffineTransform3D> affineTransform3DList = new ArrayList<>();
     private AffineTransform3D oldTransform;
 
     public BDVStacking(String... paths) throws IOException {
@@ -48,6 +47,8 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
             bdv.getSources().addAll(source.getSources());
             bdv.getConverterSetups().addAll(source.getConverterSetups());
         }
+
+        BDVUtils.initBrightness(bdv);
 
         bdv.getBdvHandle().getViewerPanel().state().changeListeners().add(viewerStateChange -> {
             if (bdv.getBdvHandle().getViewerPanel().state().getCurrentSource() == null)
@@ -88,9 +89,6 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
             }
         });
 
-
-        BDVUtils.initBrightness( bdv);
-
         final CardPanel cardPanel = bdv.getBdvHandle().getCardPanel();
 
         AffineTransform3D currentTransformation = affineTransform3DList.get(sourceId).copy();
@@ -121,9 +119,8 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                 false,
                 new Insets(0, 4, 0, 0)));
 
-
         BigDataViewerActions actions = new BigDataViewerActions(options.values.getInputTriggerConfig());
-        actions.runnableAction(() -> randomColor.click(), "Random Color", new String[]{"R"});
+        actions.runnableAction(randomColor::click, "Random Color", "R");
         actions.install(bdv.getBdvHandle().getKeybindings(), "my actions");
 
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_VIEWERMODES_CARD, false);

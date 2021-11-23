@@ -1,16 +1,11 @@
 package com.preibisch.bdvtransform.panels.utils;
 
-import bdv.tools.brightness.MinMaxGroup;
-import bdv.tools.brightness.SetupAssignments;
 import bdv.util.BdvStackSource;
 import bdv.viewer.Source;
-import bdv.viewer.state.ViewerState;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.histogram.DiscreteFrequencyDistribution;
 import net.imglib2.histogram.Histogram1d;
 import net.imglib2.histogram.Real1dBinMapper;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
 
@@ -26,23 +21,21 @@ public class BDVUtils {
      *
      * @param cumulativeMinCutoff - quantile of min
      * @param cumulativeMaxCutoff - quantile of max
-     * @param state               - Bdv's ViewerSate
-     * @param setupAssignments    - Bdv's View assignments
-     * @param <T>                 - type extending RealType
+     * @param bdv                 - Bdv
      */
-    public static <T extends RealType<T>> void initBrightness(final double cumulativeMinCutoff, final double cumulativeMaxCutoff, final ViewerState state, final SetupAssignments setupAssignments) {
-        for (int current = 0; current < state.getSources().size(); current++) {
-            final Source<?> source = state.getSources().get(current).getSpimSource();
-            final int timepoint = state.getCurrentTimepoint();
+    public static <T extends RealType<T>> void initBrightness(final double cumulativeMinCutoff, final double cumulativeMaxCutoff, final BdvStackSource<T> bdv) {
+        for (int current = 0; current < bdv.getSources().size(); current++) {
+            final Source<?> source = bdv.getSources().get(current).getSpimSource();
+            final int timepoint = 0;
             if (!source.isPresent(timepoint))
                 return;
-            if (!RealType.class.isInstance(source.getType()))
+            if (!(source.getType() instanceof RealType))
                 return;
             @SuppressWarnings("unchecked") final RandomAccessibleInterval<T> img = (RandomAccessibleInterval<T>) source.getSource(timepoint, source.getNumMipmapLevels() - 1);
             final long z = (img.min(2) + img.max(2) + 1) / 2;
 
             final int numBins = 6535;
-            final Histogram1d<T> histogram = new Histogram1d<T>(Views.iterable(Views.hyperSlice(img, 2, z)), new Real1dBinMapper<T>(0, 65535, numBins, false));
+            final Histogram1d<T> histogram = new Histogram1d<>(Views.iterable(Views.hyperSlice(img, 2, z)), new Real1dBinMapper<>(0, 65535, numBins, false));
 
             // sample some more planes if we have enough
             if ((img.max(2) + 1 - img.min(2)) > 4) {
@@ -66,13 +59,12 @@ public class BDVUtils {
                 cumulative += dfd.relativeFrequency(bin);
             }
             final int max = i * 65535 / numBins;
-            final MinMaxGroup minmax = setupAssignments.getMinMaxGroups().get(current);
-            minmax.getMinBoundedValue().setCurrentValue(min);
-            minmax.getMaxBoundedValue().setCurrentValue(max);
+            bdv.getConverterSetups().get(current).setDisplayRange(min, max);
         }
     }
 
-    public static <T extends NumericType<T> & NativeType<T>> void initBrightness(BdvStackSource<T> bdv) {
-        BDVUtils.initBrightness(0.001, 0.999, bdv.getBdvHandle().getViewerPanel().getState(), bdv.getBdvHandle().getSetupAssignments());
+
+    public static void initBrightness(BdvStackSource bdv) {
+        BDVUtils.initBrightness(0.001, 0.999, bdv);
     }
 }

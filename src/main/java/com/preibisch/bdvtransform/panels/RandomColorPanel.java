@@ -4,7 +4,6 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
 import bdv.util.BdvStackSource;
 import com.preibisch.bdvtransform.panels.utils.ColorStream;
-import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
@@ -42,18 +41,13 @@ public class RandomColorPanel extends BDVCardPanel implements ActionListener {
     }
 
     public static void colorSources(List<ConverterSetup> setups, Iterator<ARGBType> iterator) {
-
         for (int i = 0; i < setups.size(); ++i)
             setups.get(i).setColor(iterator.next());
-    }
-
-    @Override
-    public void onNotify(AffineTransform3D transform) {
-
     }
 
     public RandomColorPanel click(){
         this.actionPerformed(null);
         return this;
     }
+
 }

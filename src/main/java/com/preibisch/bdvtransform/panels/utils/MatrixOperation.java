@@ -60,4 +60,12 @@ public class MatrixOperation {
         print(resultMat);
     }
 
+    public static double[] reorderTranslation(double[] translation, int[] positions) {
+        double[] result = new double[translation.length];
+        for (int i = 0; i < translation.length; i++) {
+            result[positions[i]] = translation[i];
+        }
+        return result;
+    }
+
 }

@@ -11,15 +11,13 @@ import java.awt.event.ActionListener;
 public class ScalingPanel extends BDVCardPanel implements ActionListener {
     private final TransformationUpdater updater;
     private final JCheckBox oneScale;
-    private AffineTransform3D transform;
     private JTextField sx;
     private JTextField sy;
     private JTextField sz;
 
 
-    public ScalingPanel(AffineTransform3D transform, TransformationUpdater updater) {
+    public ScalingPanel(TransformationUpdater updater) {
         super("ScalingPanel", "Scale", new GridLayout(0, 1));
-        this.transform = transform;
         this.updater = updater;
         this.sx = new JTextField(String.valueOf(1.0));
         this.sy = new JTextField(String.valueOf(1.0));
@@ -61,30 +59,26 @@ public class ScalingPanel extends BDVCardPanel implements ActionListener {
         return p;
     }
 
-    private void updateView() {
+    @Override
+    protected void updateView() {
         this.sx.setText(String.valueOf(1.0));
         this.sy.setText(String.valueOf(1.0));
         this.sz.setText(String.valueOf(1.0));
     }
 
     @Override
-    public void onNotify(AffineTransform3D transform) {
-        this.transform = transform;
-        updateView();
-    }
-
-    @Override
     public void actionPerformed(ActionEvent e) {
+        AffineTransform3D transform = new AffineTransform3D();
         if (oneScale.isSelected()) {
             double x = Double.parseDouble(sx.getText());
-            this.transform.scale(x);
+            transform.scale(x);
         } else {
             double x = Double.parseDouble(sx.getText());
             double y = Double.parseDouble(sy.getText());
             double z = Double.parseDouble(sz.getText());
-            this.transform.scale(x, y, z);
+            transform.scale(x, y, z);
         }
-        updater.setTransformation(this.transform, this);
+        updater.setTransformation(transform, this);
         updateView();
     }
 }

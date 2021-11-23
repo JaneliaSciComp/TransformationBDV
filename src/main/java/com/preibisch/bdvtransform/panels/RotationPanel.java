@@ -9,16 +9,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class RotationPanel extends BDVCardPanel implements ActionListener {
-    private final TransformationUpdater updater;
-    private AffineTransform3D transform;
+    private final TransformationUpdater updater;;
     private JTextField rx;
     private JTextField ry;
     private JTextField rz;
 
 
-    public RotationPanel(AffineTransform3D transform, TransformationUpdater updater) {
+    public RotationPanel( TransformationUpdater updater) {
         super("RotationPanel", "Rotate", new GridLayout(0, 1));
-        this.transform = transform;
         this.updater = updater;
         this.rx = new JTextField(String.valueOf(0.0));
         this.ry = new JTextField(String.valueOf(0.0));
@@ -38,27 +36,23 @@ public class RotationPanel extends BDVCardPanel implements ActionListener {
         return p;
     }
 
-    private void updateView() {
+    @Override
+    protected void updateView() {
         this.rx.setText(String.valueOf(0.0));
         this.ry.setText(String.valueOf(0.0));
         this.rz.setText(String.valueOf(0.0));
     }
 
     @Override
-    public void onNotify(AffineTransform3D transform) {
-        this.transform = transform;
-        updateView();
-    }
-
-    @Override
     public void actionPerformed(ActionEvent e) {
+        AffineTransform3D transform = new AffineTransform3D();
         double x = Double.parseDouble(rx.getText());
         double y = Double.parseDouble(ry.getText());
         double z = Double.parseDouble(rz.getText());
-        if (x > 0) this.transform.rotate(0, x);
-        if (y > 0) this.transform.rotate(1, y);
-        if (z > 0) this.transform.rotate(2, z);
-        updater.setTransformation(this.transform,this);
+        if (x > 0) transform.rotate(0, x);
+        if (y > 0) transform.rotate(1, y);
+        if (z > 0) transform.rotate(2, z);
+        updater.setTransformation(transform,this);
         updateView();
     }
 }

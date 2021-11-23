@@ -63,7 +63,6 @@ public class BDVUtils {
         }
     }
 
-
     public static void initBrightness(BdvStackSource bdv) {
         BDVUtils.initBrightness(0.001, 0.999, bdv);
     }

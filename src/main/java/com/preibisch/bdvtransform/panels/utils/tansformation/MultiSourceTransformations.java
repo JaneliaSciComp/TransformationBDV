@@ -1,4 +1,4 @@
-package com.preibisch.bdvtransform.panels.utils;
+package com.preibisch.bdvtransform.panels.utils.tansformation;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvStackSource;

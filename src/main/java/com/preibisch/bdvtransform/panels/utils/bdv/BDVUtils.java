@@ -1,4 +1,4 @@
-package com.preibisch.bdvtransform.panels.utils;
+package com.preibisch.bdvtransform.panels.utils.bdv;
 
 import bdv.util.BdvStackSource;
 import bdv.viewer.Source;

@@ -1,5 +1,6 @@
-package com.preibisch.bdvtransform.panels.utils;
+package com.preibisch.bdvtransform.panels.utils.tansformation;
 
+import com.preibisch.bdvtransform.panels.utils.AdaptiveLabel;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import javax.swing.*;

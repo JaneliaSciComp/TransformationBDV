@@ -1,4 +1,4 @@
-package com.preibisch.bdvtransform.panels.utils;
+package com.preibisch.bdvtransform.panels.utils.tansformation;
 
 import net.imglib2.realtransform.AffineTransform3D;
 
@@ -9,9 +9,6 @@ import java.util.Map;
 
 
 public class ImageTransformations {
-    enum TransformationType {
-        Manual, Automatic
-    }
 
     List<Map.Entry<AffineTransform3D, TransformationType>> transformations = new ArrayList<>();
     AffineTransform3D currentTransformation;

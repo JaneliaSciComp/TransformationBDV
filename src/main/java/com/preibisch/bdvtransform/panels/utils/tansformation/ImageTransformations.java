@@ -2,15 +2,12 @@ package com.preibisch.bdvtransform.panels.utils.tansformation;
 
 import net.imglib2.realtransform.AffineTransform3D;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.TreeMap;
 
 
 public class ImageTransformations {
 
-    List<Map.Entry<AffineTransform3D, TransformationType>> transformations = new ArrayList<>();
+    TreeMap<Integer, ImageTransformation> transformations = new TreeMap<>();
     AffineTransform3D currentTransformation;
     int currentPosition = 0;
 
@@ -20,7 +17,7 @@ public class ImageTransformations {
 
     public ImageTransformations(AffineTransform3D transform) {
         currentTransformation = transform;
-        transformations.add(new AbstractMap.SimpleEntry<>(transform, TransformationType.Automatic));
+        transformations.put(0, new ImageTransformation(transform, TransformationType.Automatic));
     }
 
     public AffineTransform3D add(AffineTransform3D transform) {
@@ -33,7 +30,8 @@ public class ImageTransformations {
 
     private AffineTransform3D add(AffineTransform3D transform, TransformationType type) {
         removeAfterPosition(currentPosition);
-        transformations.add(new AbstractMap.SimpleEntry<>(transform, TransformationType.Manual));
+        Integer position = transformations.lastKey() + 1;
+        transformations.put(position, new ImageTransformation(transform, TransformationType.Manual));
         currentPosition++;
         if (type.equals(TransformationType.Automatic))
             currentTransformation.concatenate(transform);
@@ -62,13 +60,13 @@ public class ImageTransformations {
     }
 
     private AffineTransform3D recalculateTransformation() {
-        currentTransformation = transformations.get(0).getKey().copy();
+        currentTransformation = transformations.get(0).getTransformation().copy();
         for (int i = 1; i <= currentPosition; i++) {
-            Map.Entry<AffineTransform3D, TransformationType> transform = transformations.get(i);
-            if (transform.getValue().equals(TransformationType.Automatic))
-                currentTransformation.concatenate(transform.getKey());
+            ImageTransformation transform = transformations.get(i);
+            if (transform.getType().equals(TransformationType.Automatic))
+                currentTransformation.concatenate(transform.getTransformation());
             else
-                currentTransformation = transform.getKey().copy();
+                currentTransformation = transform.getTransformation().copy();
         }
         print();
         return currentTransformation;
@@ -89,14 +87,18 @@ public class ImageTransformations {
         return currentPosition > 0;
     }
 
-    public List<Map.Entry<AffineTransform3D, TransformationType>> getAll() {
+    public TreeMap<Integer, ImageTransformation> getAll() {
         return transformations;
     }
 
     public AffineTransform3D removeAt(int i) {
-        if (i >= transformations.size())
+        if (!transformations.containsKey(i))
             return null;
         transformations.remove(i);
         return recalculateTransformation();
+    }
+
+    public int size() {
+        return transformations.size();
     }
 }

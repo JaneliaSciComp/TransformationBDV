@@ -14,6 +14,7 @@ import com.preibisch.bdvtransform.panels.FlipPanel;
 import com.preibisch.bdvtransform.panels.RandomColorPanel;
 import com.preibisch.bdvtransform.panels.RotationPanel;
 import com.preibisch.bdvtransform.panels.ScalingPanel;
+import com.preibisch.bdvtransform.panels.TransformationsHistoryPanel;
 import com.preibisch.bdvtransform.panels.TranslationPanel;
 import com.preibisch.bdvtransform.panels.UndoPanel;
 import com.preibisch.bdvtransform.panels.utils.bdv.BDVUtils;
@@ -54,12 +55,12 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
             if (bdv.getBdvHandle().getViewerPanel().state().getCurrentSource() == null)
                 return;
             if (viewerStateChange.equals(ViewerStateChange.CURRENT_SOURCE_CHANGED))
-            for (int i = 0; i < bdv.getSources().size(); i++)
-                if (bdv.getSources().get(i).getSpimSource().equals(bdv.getBdvHandle().getViewerPanel().state().getCurrentSource().getSpimSource())) {
-                    System.out.println("Current source position : " + i);
-                    sourcesTransformations.setCurrentSource(i);
-                    break;
-                }
+                for (int i = 0; i < bdv.getSources().size(); i++)
+                    if (bdv.getSources().get(i).getSpimSource().equals(bdv.getBdvHandle().getViewerPanel().state().getCurrentSource().getSpimSource())) {
+                        System.out.println("Current source position : " + i);
+                        sourcesTransformations.setCurrentSource(i);
+                        break;
+                    }
         });
 
         TransformationUpdater updater = (transformation, source) -> {
@@ -89,6 +90,9 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
             AffineTransform3D transform = sourcesTransformations.getCurrentTransformations().get();
             ExportTransformationPanel.save(transform);
         }));
+
+        this.controlPanels.add(new TransformationsHistoryPanel(sourcesTransformations.getCurrentTransformations(), position -> sourcesTransformations.getCurrentTransformations().removeAt(position)));
+
 
         this.controlPanels.forEach(p -> cardPanel.addCard(p.getKey(),
                 p.getTitle(),

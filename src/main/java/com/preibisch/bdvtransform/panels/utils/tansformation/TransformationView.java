@@ -7,26 +7,42 @@ import javax.swing.*;
 import java.awt.*;
 
 public class TransformationView extends JPanel {
-    private final static int MAX_SIZE = 170;
+    private final static int MAX_SIZE = 160;
+    private final ImageTransformation imageTransformation;
 
-    public TransformationView(AffineTransform3D transform) {
+    public TransformationView(Integer position, ImageTransformation imageTransformation, TransformationViewUpdater updater) {
         super();
+        this.imageTransformation = imageTransformation;
 
         JPanel mainPane = new JPanel(new FlowLayout());
-        mainPane.setPreferredSize(new Dimension(MAX_SIZE,MAX_SIZE-20));
+        mainPane.setPreferredSize(new Dimension(MAX_SIZE, MAX_SIZE - 20));
         JPanel matrixPane = new JPanel(new GridLayout(3, 4));
         JButton button = new JButton("-");
-        button.setPreferredSize(new Dimension(20,20));
-        matrixPane.setPreferredSize(new Dimension(MAX_SIZE-30, MAX_SIZE-30));
-        for (double x : transform.getRowPackedCopy()) {
+        button.addActionListener(e -> updater.remove(position, this));
+        button.setPreferredSize(new Dimension(20, 20));
+        matrixPane.setPreferredSize(new Dimension(MAX_SIZE - 30, MAX_SIZE - 30));
+        for (double x : imageTransformation.getTransformation().getRowPackedCopy()) {
             AdaptiveLabel label = new AdaptiveLabel(String.valueOf(x));
             matrixPane.add(label);
         }
         mainPane.setBackground(Color.PINK);
-        matrixPane.setBackground(Color.WHITE);
         mainPane.add(button);
         mainPane.add(matrixPane);
         this.add(mainPane);
+    }
+
+    public interface TransformationViewUpdater {
+        void remove(int position, JPanel panel);
+    }
+
+
+    public TransformationView(AffineTransform3D transform3D) {
+        this(0, transform3D, null);
+    }
+
+    public TransformationView(int position, AffineTransform3D transform, TransformationViewUpdater updater) {
+        this(position, new ImageTransformation(transform), updater);
+
     }
 
     public static void main(String[] args) {

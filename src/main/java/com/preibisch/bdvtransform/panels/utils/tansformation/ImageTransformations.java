@@ -17,7 +17,7 @@ public class ImageTransformations {
     }
 
     public ImageTransformations(AffineTransform3D transform) {
-        currentTransformation = transform;
+        currentTransformation = transform.copy();
         transformations.put(0, new ImageTransformation(transform, TransformationType.Automatic));
     }
 
@@ -29,15 +29,19 @@ public class ImageTransformations {
         return add(transform, TransformationType.Manual);
     }
 
+    public int getCurrentPosition() {
+        return currentPosition;
+    }
+
     private AffineTransform3D add(AffineTransform3D transform, TransformationType type) {
         removeAfterPosition(currentPosition);
         Integer position = transformations.lastKey() + 1;
-        transformations.put(position, new ImageTransformation(transform, TransformationType.Manual));
+        transformations.put(position, new ImageTransformation(transform, type));
         currentPosition++;
-        if (type.equals(TransformationType.Automatic))
+//        if (type.equals(TransformationType.Automatic))
             currentTransformation.preConcatenate(transform);
-        else
-            currentTransformation = transform.copy();
+//        else
+//            currentTransformation = transform.copy();
         print();
         return get();
     }
@@ -65,22 +69,35 @@ public class ImageTransformations {
     }
 
     private AffineTransform3D recalculateTransformation() {
-        currentTransformation = transformations.get(0).getTransformation().copy();
-        for (int i = 1; i <= currentPosition; i++) {
-            ImageTransformation transform = transformations.get(i);
-            if (transform.getType().equals(TransformationType.Automatic))
-                currentTransformation.concatenate(transform.getTransformation());
-            else
-                currentTransformation = transform.getTransformation().copy();
+        int i = 1;
+        currentTransformation = transformations.firstEntry().getValue().getTransformation().copy();
+        print();
+        for (Integer key : transformations.keySet()){
+            if (i>currentPosition) break;
+            if(key.equals(transformations.firstKey())){
+                continue;
+            }else{
+//                add(transformations.get(key));
+                ImageTransformation transform = transformations.get(key);
+////                if (transform.getType().equals(TransformationType.Automatic))
+                    currentTransformation.concatenate(transform.getTransformation());
+//                else
+//                    currentTransformation = transform.getTransformation().copy();
+            }
+            i++;
         }
         print();
         return currentTransformation;
     }
 
+    private void add(ImageTransformation imageTransformation) {
+        add(imageTransformation.getTransformation(),imageTransformation.getType());
+    }
+
     private void removeAfterPosition(int position) {
         if (position < transformations.size() - 1)
             while (position < transformations.size() - 1)
-                transformations.remove(transformations.size() - 1);
+                transformations.remove(transformations.lastKey());
     }
 
     private void print() {
@@ -100,10 +117,15 @@ public class ImageTransformations {
         if (!transformations.containsKey(i))
             return null;
         transformations.remove(i);
+        currentPosition--;
         return recalculateTransformation();
     }
 
     public int size() {
         return transformations.size();
+    }
+
+    public boolean canRedo() {
+        return (currentPosition < transformations.size() - 2);
     }
 }

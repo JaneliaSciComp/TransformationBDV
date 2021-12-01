@@ -32,18 +32,24 @@ public class TransformationsHistoryPanel extends BDVCardPanel {
     }
 
     private void addAll(ImageTransformations transformations) {
-        for (Integer i : transformations.getAll().keySet()) {
-            addTransformation(i, transformations.getAll().get(i));
+        int max = transformations.getCurrentPosition();
+        int i = 0;
+        for (Integer key : transformations.getAll().keySet()) {
+            if(i>max) break;
+            addTransformation(key, transformations.getAll().get(key));
+            i++;
         }
     }
 
 
     public void addTransformation(Integer i, ImageTransformation imageTransformation) {
         mainPanel.add(new TransformationView(i, imageTransformation, (position, panel) -> {
-            updater.remove(position);
-            TransformationsHistoryPanel.this.remove(panel);
-            updateView();
+            if (updater.remove(position)) {
+                mainPanel.remove(panel);
+                updateView();
+            }
         }));
+        updateView();
     }
 
     @Override
@@ -65,11 +71,9 @@ public class TransformationsHistoryPanel extends BDVCardPanel {
         ImageTransformations transformations = new ImageTransformations();
         for (int i = 0; i < 10; i++)
             transformations.add(new AffineTransform3D());
-        TransformationsHistoryPanel transformationsPanel = new TransformationsHistoryPanel(transformations, new TransformationPanelUpdater() {
-            @Override
-            public void remove(int position) {
-                System.out.println(position);
-            }
+        TransformationsHistoryPanel transformationsPanel = new TransformationsHistoryPanel(transformations, position -> {
+            System.out.println(position);
+            return true;
         });
         JFrame frame = new JFrame("Test");
         frame.setLayout(new GridLayout(0, 1));

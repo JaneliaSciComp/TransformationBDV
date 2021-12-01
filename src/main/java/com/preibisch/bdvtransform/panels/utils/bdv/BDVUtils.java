@@ -6,8 +6,13 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.histogram.DiscreteFrequencyDistribution;
 import net.imglib2.histogram.Histogram1d;
 import net.imglib2.histogram.Real1dBinMapper;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
+
+import java.util.Iterator;
 
 /**
  * Code copied from BigStitcher
@@ -64,6 +69,17 @@ public class BDVUtils {
     }
 
     public static void initBrightness(BdvStackSource bdv) {
+        bdv.getBdvHandle().getViewerPanel().showMessage("Automatic Brightness Setup ..");
         BDVUtils.initBrightness(0.001, 0.999, bdv);
     }
+
+
+    public static <T extends NumericType<T> & NativeType<T>> void randomColor(BdvStackSource<T> bdv) {
+        bdv.getBdvHandle().getViewerPanel().showMessage("Next Random Color");
+        Iterator<ARGBType> iterator = ColorStream.iterator();
+        for (int i = 0; i < bdv.getConverterSetups().size(); ++i)
+            bdv.getConverterSetups().get(i).setColor(iterator.next());
+        bdv.getBdvHandle().getViewerPanel().requestRepaint();
+    }
+
 }

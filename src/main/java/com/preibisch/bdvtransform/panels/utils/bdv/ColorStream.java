@@ -92,11 +92,15 @@ public class ColorStream
         return get( ++i );
     }
 
+    private static int getRandomNumber(int min, int max) {
+        return (int) ((Math.random() * (max - min)) + min);
+    }
+
     final static public Iterator< ARGBType > iterator()
     {
         return new Iterator< ARGBType >()
         {
-            long i = 0;
+            long i = getRandomNumber(1,30);
 
             @Override
             public boolean hasNext()

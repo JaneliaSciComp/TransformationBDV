@@ -49,6 +49,8 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
 
         BDVUtils.initBrightness(bdv);
         this.sourcesTransformations = MultiSourceTransformations.initWithSources(bdv.getSources());
+        TransformationsHistoryPanel transformationHistoryPanel = new TransformationsHistoryPanel(sourcesTransformations.getCurrentTransformations(), position -> sourcesTransformations.getCurrentTransformations().removeAt(position));
+
 
         bdv.getBdvHandle().getViewerPanel().state().changeListeners().add(viewerStateChange -> {
 
@@ -59,6 +61,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
                     if (bdv.getSources().get(i).getSpimSource().equals(bdv.getBdvHandle().getViewerPanel().state().getCurrentSource().getSpimSource())) {
                         System.out.println("Current source position : " + i);
                         sourcesTransformations.setCurrentSource(i);
+                        transformationHistoryPanel.setAll(sourcesTransformations.getCurrentTransformations());
                         break;
                     }
         });
@@ -66,6 +69,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         TransformationUpdater updater = (transformation, source) -> {
             sourcesTransformations.getCurrentTransformations().add(transformation);
             sourcesTransformations.updateView(bdv);
+            transformationHistoryPanel.addTransformation(sourcesTransformations.getCurrentTransformations().getLast());
         };
 
         bdv.getBdvHandle().getManualTransformEditor().manualTransformActiveListeners().add(b -> {
@@ -91,7 +95,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
             ExportTransformationPanel.save(transform);
         }));
 
-        this.controlPanels.add(new TransformationsHistoryPanel(sourcesTransformations.getCurrentTransformations(), position -> sourcesTransformations.getCurrentTransformations().removeAt(position)));
+         this.controlPanels.add(transformationHistoryPanel);
 
 
         this.controlPanels.forEach(p -> cardPanel.addCard(p.getKey(),
@@ -108,6 +112,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCES_CARD, false);
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD, false);
 
+        transformationHistoryPanel.refresh();
         bdv.getBdvHandle().getViewerPanel().requestRepaint();
     }
 

@@ -19,8 +19,8 @@ public class AdaptiveLabel extends JLabel {
         currFontSize = this.getFont().getSize();
         Border line = BorderFactory.createLineBorder(Color.gray);
         setBorder(line);
-        adaptLabelFont(this);
-        init();
+//        adaptLabelFont(this);
+//        init();
 
     }
 

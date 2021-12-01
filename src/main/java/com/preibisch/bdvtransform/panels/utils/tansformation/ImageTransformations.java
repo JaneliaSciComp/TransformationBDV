@@ -2,6 +2,7 @@ package com.preibisch.bdvtransform.panels.utils.tansformation;
 
 import net.imglib2.realtransform.AffineTransform3D;
 
+import java.util.Map;
 import java.util.TreeMap;
 
 
@@ -34,7 +35,7 @@ public class ImageTransformations {
         transformations.put(position, new ImageTransformation(transform, TransformationType.Manual));
         currentPosition++;
         if (type.equals(TransformationType.Automatic))
-            currentTransformation.concatenate(transform);
+            currentTransformation.preConcatenate(transform);
         else
             currentTransformation = transform.copy();
         print();
@@ -57,6 +58,10 @@ public class ImageTransformations {
 
     public AffineTransform3D get() {
         return currentTransformation;
+    }
+
+    public Map.Entry<Integer, ImageTransformation> getLast(){
+       return transformations.lastEntry();
     }
 
     private AffineTransform3D recalculateTransformation() {

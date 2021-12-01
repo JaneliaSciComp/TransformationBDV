@@ -7,7 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class TransformationView extends JPanel {
-    private final static int MAX_SIZE = 160;
+    private final static int MAX_SIZE = 180;
     private final ImageTransformation imageTransformation;
 
     public TransformationView(Integer position, ImageTransformation imageTransformation, TransformationViewUpdater updater) {

@@ -8,16 +8,17 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map;
 
 public class TransformationsHistoryPanel extends BDVCardPanel {
     private final TransformationPanelUpdater updater;
     private JPanel mainPanel;
 
     public TransformationsHistoryPanel(ImageTransformations transformations, TransformationPanelUpdater transformationPanelUpdater) {
-        super("History", "History", new GridLayout(0, 1),true);
+        super("History", "History", new GridLayout(0, 1), true);
         this.updater = transformationPanelUpdater;
 
-//        setSize(new Dimension(180, 600));
+        setSize(new Dimension(180, 600));
         mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(0, 1));
 
@@ -32,11 +33,12 @@ public class TransformationsHistoryPanel extends BDVCardPanel {
 
     private void addAll(ImageTransformations transformations) {
         for (Integer i : transformations.getAll().keySet()) {
-            addPanel(i, transformations.getAll().get(i));
+            addTransformation(i, transformations.getAll().get(i));
         }
     }
 
-    private void addPanel(Integer i, ImageTransformation imageTransformation) {
+
+    public void addTransformation(Integer i, ImageTransformation imageTransformation) {
         mainPanel.add(new TransformationView(i, imageTransformation, (position, panel) -> {
             updater.remove(position);
             TransformationsHistoryPanel.this.remove(panel);
@@ -55,25 +57,29 @@ public class TransformationsHistoryPanel extends BDVCardPanel {
         addAll(transformations);
     }
 
+    public void addTransformation(Map.Entry<Integer, ImageTransformation> entry) {
+        addTransformation(entry.getKey(), entry.getValue());
+    }
 
     public static void main(String[] args) {
-
         ImageTransformations transformations = new ImageTransformations();
         for (int i = 0; i < 10; i++)
             transformations.add(new AffineTransform3D());
-
         TransformationsHistoryPanel transformationsPanel = new TransformationsHistoryPanel(transformations, new TransformationPanelUpdater() {
             @Override
             public void remove(int position) {
                 System.out.println(position);
             }
         });
-
         JFrame frame = new JFrame("Test");
         frame.setLayout(new GridLayout(0, 1));
         frame.setSize(new Dimension(200, 600));
         JScrollPane scrollFrame = new JScrollPane(transformationsPanel);
         frame.add(scrollFrame);
         frame.setVisible(true);
+    }
+
+    public void refresh() {
+        updateView();
     }
 }

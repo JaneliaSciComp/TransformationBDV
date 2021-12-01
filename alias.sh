@@ -1,1 +1,1 @@
-alias transformationview='java -cp "app.jar" picocli.CommandLine.Main'
+alias runview='java -jar TransformationBDV-0.1-jar-with-dependencies.jar'

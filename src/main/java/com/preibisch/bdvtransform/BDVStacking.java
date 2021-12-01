@@ -15,7 +15,6 @@ import com.preibisch.bdvtransform.panels.RotationPanel;
 import com.preibisch.bdvtransform.panels.ScalingPanel;
 import com.preibisch.bdvtransform.panels.TransformationsHistoryPanel;
 import com.preibisch.bdvtransform.panels.TranslationPanel;
-import com.preibisch.bdvtransform.panels.UndoPanel;
 import com.preibisch.bdvtransform.panels.utils.bdv.BDVUtils;
 import com.preibisch.bdvtransform.panels.utils.tansformation.MultiSourceTransformations;
 import com.preibisch.bdvtransform.panels.utils.tansformation.TransformationUpdater;
@@ -96,10 +95,6 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         final CardPanel cardPanel = bdv.getBdvHandle().getCardPanel();
 
         this.controlPanels.add(new TranslationPanel(updater));
-        this.controlPanels.add(new UndoPanel(e -> {
-            sourcesTransformations.getCurrentTransformations().undo();
-            sourcesTransformations.updateView(bdv);
-        }));
         this.controlPanels.add(new ScalingPanel(updater));
         this.controlPanels.add(new RotationPanel(updater));
         this.controlPanels.add(new FlipPanel(updater));
@@ -129,6 +124,7 @@ public class BDVStacking<T extends NumericType<T> & NativeType<T>> {
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD, false);
 
         bdv.getBdvHandle().getViewerPanel().requestRepaint();
+        System.out.println("loaded..");
     }
 
     public static void main(String[] args) throws IOException {

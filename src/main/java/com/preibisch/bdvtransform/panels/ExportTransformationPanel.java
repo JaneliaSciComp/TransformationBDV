@@ -1,40 +1,31 @@
 package com.preibisch.bdvtransform.panels;
 
-import com.preibisch.bdvtransform.panels.utils.TransformationUpdater;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
-public class ExportTransformationPanel extends BDVCardPanel implements ActionListener {
-    private final TransformationUpdater updater;
-    private AffineTransform3D transform;
+public class ExportTransformationPanel extends BDVCardPanel {
 
-
-    public ExportTransformationPanel(AffineTransform3D transform, TransformationUpdater updater) {
-        super("ExportPanel", "Export Transformation", new GridLayout(0, 1));
-        this.transform = transform;
-        this.updater = updater;
+    public ExportTransformationPanel(ActionListener listener, boolean expend) {
+        super("ExportPanel", "Export Transformation", new GridLayout(0, 1), expend);
         JButton updateButton = new JButton("Save");
-        updateButton.addActionListener(this);
+        updateButton.addActionListener(listener);
         this.add(updateButton);
     }
 
-    @Override
-    public void onNotify(AffineTransform3D transform) {
-        this.transform = transform;
+    public ExportTransformationPanel(ActionListener listener) {
+        this(listener, false);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+    public static void save(AffineTransform3D transform) {
         try {
             JFileChooser fileChooser = new JFileChooser();
-            int option = fileChooser.showSaveDialog(this);
+            int option = fileChooser.showSaveDialog(null);
             if (option == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();
                 BufferedWriter writer = new BufferedWriter(new FileWriter(file));
@@ -49,4 +40,5 @@ public class ExportTransformationPanel extends BDVCardPanel implements ActionLis
             System.out.println("Couldn't save the file " + exception.getMessage());
         }
     }
+
 }

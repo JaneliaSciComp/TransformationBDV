@@ -1,4 +1,4 @@
-package com.preibisch.bdvtransform.panels.utils;
+package com.preibisch.bdvtransform.panels.utils.tansformation;
 
 public class MatrixOperation {
     public static double[][] multiplyMatrices(double[][] firstMatrix, double[][] secondMatrix) {
@@ -58,6 +58,14 @@ public class MatrixOperation {
         print(result);
         double[][] resultMat = toMatrix(result, 4);
         print(resultMat);
+    }
+
+    public static double[] reorderTranslation(double[] translation, int[] positions) {
+        double[] result = new double[translation.length];
+        for (int i = 0; i < translation.length; i++) {
+            result[positions[i]] = translation[i];
+        }
+        return result;
     }
 
 }

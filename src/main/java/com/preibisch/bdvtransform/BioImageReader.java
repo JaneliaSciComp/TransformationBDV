@@ -20,7 +20,7 @@ public class BioImageReader {
         System.out.println("Opening: " + file.getAbsolutePath());
         ImagePlus imp = new IOHelper().readIp(file);
         final Img<T> image = ImagePlusAdapter.wrap(imp);
-
+        System.out.println("Got the image.");
         return image;
     }
 

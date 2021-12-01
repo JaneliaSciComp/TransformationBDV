@@ -7,4 +7,8 @@ Using :
 - Template-Building https://github.com/saalfeldlab/template-building
 
 TODO:
-Next undo
+- Add redo button
+- Add History view
+
+FIX:
+- Manual transformation after moving view

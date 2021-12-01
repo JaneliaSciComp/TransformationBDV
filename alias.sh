@@ -1,0 +1,1 @@
+alias transformationview='java -cp "app.jar" picocli.CommandLine.Main'

@@ -1,4 +1,4 @@
-package com.preibisch.bdvtransform.panels.utils;
+package com.preibisch.bdvtransform.panels.utils.tansformation;
 
 public class MatrixOperation {
     public static double[][] multiplyMatrices(double[][] firstMatrix, double[][] secondMatrix) {

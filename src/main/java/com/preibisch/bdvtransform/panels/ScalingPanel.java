@@ -1,6 +1,6 @@
 package com.preibisch.bdvtransform.panels;
 
-import com.preibisch.bdvtransform.panels.utils.TransformationUpdater;
+import com.preibisch.bdvtransform.panels.utils.tansformation.TransformationUpdater;
 import net.imglib2.realtransform.AffineTransform3D;
 
 import javax.swing.*;

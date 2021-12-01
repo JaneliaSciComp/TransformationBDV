@@ -3,7 +3,7 @@ package com.preibisch.bdvtransform.panels;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.BdvHandle;
 import bdv.util.BdvStackSource;
-import com.preibisch.bdvtransform.panels.utils.ColorStream;
+import com.preibisch.bdvtransform.panels.utils.bdv.ColorStream;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;

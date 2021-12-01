@@ -36,7 +36,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package com.preibisch.bdvtransform.panels.utils;
+package com.preibisch.bdvtransform.panels.utils.bdv;
 
 import net.imglib2.type.numeric.ARGBType;
 
@@ -92,11 +92,15 @@ public class ColorStream
         return get( ++i );
     }
 
+    private static int getRandomNumber(int min, int max) {
+        return (int) ((Math.random() * (max - min)) + min);
+    }
+
     final static public Iterator< ARGBType > iterator()
     {
         return new Iterator< ARGBType >()
         {
-            long i = 0;
+            long i = getRandomNumber(1,30);
 
             @Override
             public boolean hasNext()

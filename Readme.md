@@ -6,6 +6,11 @@ Interactive tool for image transformation
 The goal of the application is help user to get the perfect transformation matrix in an interactive way.
 
 ## How to use:
+### Run
+`java -jar JAR_FILE [<files>...]  `
+
+`<files> `Image files to be opened exmpl.: NRRD
+
 ### Shortcuts:
 `Q` Auto Brightness
 

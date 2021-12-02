@@ -1,0 +1,1 @@
+java -jar target/TransformationBDV-0.1-jar-with-dependencies.jar /Users/Marwan/Desktop/cellmap/Task/data/PALM_532nm_gauss3d_d2.nrrd /Users/Marwan/Desktop/cellmap/Task/data/mito_membrane_s4.nrrd

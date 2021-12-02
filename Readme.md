@@ -1,6 +1,7 @@
-# Goal:
+# Transformation BDV
 
 Interactive tool for image transformation
+
 ![Application](img/app.png?raw=true "Application")
 
 The goal of the application is help user to get the perfect transformation matrix in an interactive way.
